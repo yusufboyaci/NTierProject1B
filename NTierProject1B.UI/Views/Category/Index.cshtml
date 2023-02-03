@@ -1,7 +1,145 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Kategoriler";
 }
+<div id="app">
+
+    <div class="table-responsive mt-5">
+
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Kategori Adı</th>
+                    <th scope="col">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(category, index) in list">
+                    <th scope="row">{{ index }}</th>
+                    <th>{{ category.name }}</th>
+                    <td>
+                        <button v-on:click="deleteCategory(category)" type="button" class="btn btn-danger btn-sm me-2"><i class="fa-solid fa-trash"></i></button>
+                        <button v-on:click="getCategory(category)" type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal1">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Kategori Ekle
+    </button>
+
+    <a class="btn btn-outline-info ms-5" asp-controller="Product" asp-action="Index">Ürünler</a>
+
+    <!--Add Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Kategori Ekle</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Kategori Adı</label>
+                            <input type="text" class="form-control" v-model="name" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    <button type="button" class="btn btn-outline-primary" v-on:click="saveCategory">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Update Modal -->
+    <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Kategori Güncelle</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Kategori Adı</label>
+                            <input type="text" class="form-control" v-model="name" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    <button type="button" class="btn btn-outline-primary" v-on:click="updateCategory({id: id, name: name})">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 
+<script>
+    const { createApp } = Vue;
+    createApp({
+        data() {
+            return {
+                id: "",
+                name: "",
+                list: []
+            }
+        },
+        methods: {
+            saveCategory() {
+                fetch("/Category/Add", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        name: this.name
+                    }),
+                    headers: { "Content-type": "application/json; charset=UTF-8" }
+                }).then(res => location.reload())
+                    .catch(err => console.log(err));
+            },
+            getCategories() {
+                fetch("/Category/List").then(res => res.json())
+                    .then(data => this.list = data)
+                    .catch(err => console.log(err.message));
+            },
+            deleteCategory(category) {
+                fetch("/Category/Delete", {
+                    method: "DELETE",
+                    body: JSON.stringify({
+                        id: category.id,
+                        name: category.name
+                    }),
+                    headers: { "Content-type": "application/json; charset=UTF-8" }
+                }).then(res => location.reload())
+                    .catch(err => console.log(err));
+            },
+            getCategory(category) {
+                this.id = category.id;
+                this.name = category.name;
+            },
+            updateCategory(category) {
+                fetch("/Category/Update", {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        id: category.id,
+                        name: category.name
+                    }),
+                    headers: { "Content-type": "application/json; charset=UTF-8" }
+                }).then(res => { location.reload() })
+                  .catch(err => console.log(err));
+            }
+        },
+        beforeMount(){
+            this.getCategories();
+        }
+    }).mount("#app");
 
+</script>

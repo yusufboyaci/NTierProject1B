@@ -1,6 +1,156 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Ürünler";
 }
 
+<div id="app">
+    <div class="table-responsive">
+        <table class="table table-primary table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Ad</th>
+                    <th scope="col">Açıklama</th>
+                    <th scope="col">Miktar</th>
+                    <th scope="col">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(product, index) in list">
+                    <th scope="row">{{ index }}</th>
+                    <td>{{product.name}}</td>
+                    <td>{{product.description}}</td>
+                    <td>{{product.stock}}</td>
+                    <td>
+                        <button v-on:click="deleteProduct(product)" type="button" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                        <button v-on:click="getProduct(product)" type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal1">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Ürün Ekle
+    </button>
+    <a class="btn btn-outline-info ms-5" asp-controller="Category" asp-action="Index">Kategoriler</a>
+    <!--Add Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Ürün Kaydet</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Ürün Adı</label>
+                            <input type="text" class="form-control" v-model="name" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Açıklama</label>
+                            <input type="text" class="form-control" v-model="description" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ürün Miktarı</label>
+                            <input type="number" class="form-control" v-model="stock" />
+                        </div>
+                        <div class="mb-3">
+                            <select v-model="selected" class="form-select" aria-label="Default select example">
+                                <option v-bind:value="category.categoryId" v-for="category in categoryList">{{ category.categoryName }}</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    <button type="button" class="btn btn-primary" v-on:click="saveProduct">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+</div>
+<script>
+    const { createApp } = Vue;
+    createApp({
+        data() {
+            return {
+                id: "",
+                name: "",
+                description: "",
+                stock: 0,
+                categoryId: "",
+                list: [],
+                selected: "",//
+                categoryList: [],
+                categoryName: "",
+            }
+        },
+        methods: {
+            getCategories() {
+                fetch("/Category/List").then(res => res.json())
+                    .then(data => this.list = data)
+                    .catch(err => console.log(err.message));
+            },
+            saveProduct() {
+                fetch("/Product/Add", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        name: this.name,
+                        description: this.description,
+                        stock: this.stock,
+                        categoryId: this.selected//
+                    }),
+                    headers: { "Content-type": "application/json; charset=UTF-8" }
+                }).then(res => location.reload())
+                    .catch(err => console.log(err));
+            },
+            getProducts() {
+                fetch("/Product/List").then(res => res.json())
+                    .then(data => this.list = data)
+                    .catch(err => console.log(err.message));
+            },
+            deleteProduct(product) {
+                fetch("/Product/Delete", {
+                    method: "DELETE",
+                    body: JSON.stringify({
+                        id: product.id,
+                        name: product.name,
+                        description: product.description,
+                        stock: product.stock,
+                        categoryId: product.categoryId
+                    }),
+                    headers: { "Content-type": "application/json; charset=UTF-8" }
+                }).then(res => location.reload())
+                    .catch(err => console.log(err));
+            },
+            getProduct(product) {
+                this.id = product.id;
+                this.name = product.name;
+                this.description = product.description;
+                this.stock = product.stock;
+                this.categoryId = product.categoryId;
+            },
+            updateProduct(product) {
+                fetch("/Product/Update", {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        id: product.id,
+                        name: product.name,
+                        description: product.description,
+                        stock: product.stock,
+                        categoryId: product.categoryId
+                    }),
+                    headers: { "Content-type": "application/json; charset=UTF-8" }
+                }).then(res => { location.reload() })
+                    .catch(err => console.log(err));
+            }
+        },
+        beforeMount() {
+            this.getProducts();
+            this.getCategories();
+        }
+    }).mount("#app");
+</script>

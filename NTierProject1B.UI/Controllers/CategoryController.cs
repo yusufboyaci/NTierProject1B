@@ -50,7 +50,7 @@ namespace NTierProject1B.UI.Controllers
                 return BadRequest("Beklenmedik bir hata oluştu");
             }
         }
-        [HttpGet("[controller]/Update")]
+        [HttpPut("[controller]/Update")]
         public IActionResult Update([FromBody] Category category)
         {
             try
@@ -64,7 +64,7 @@ namespace NTierProject1B.UI.Controllers
                 return BadRequest("Beklenmedik bir hata oluştu");
             }
         }
-        [HttpGet("[controller]/Delete")]
+        [HttpDelete("[controller]/Delete")]
         public IActionResult Delete([FromBody] Category category)
         {
             try
