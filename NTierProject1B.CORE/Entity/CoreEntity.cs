@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NTierProject1B.CORE.Entity
 {
-    public class CoreEntity:IEntity<Guid>
+    public abstract class CoreEntity : IEntity<Guid>
     {
         NetworkFunctions networkFunctions = new NetworkFunctions();
         public CoreEntity()
