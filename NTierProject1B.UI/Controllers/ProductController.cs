@@ -40,15 +40,19 @@ namespace NTierProject1B.UI.Controllers
         [HttpPost("[controller]/Add")]
         public IActionResult Add([FromBody] Product product)
         {
-            try
+            if (product != null)
             {
-                _productRepository.Add(product);
-                return NoContent();
+                try
+                {
+                    _productRepository.Add(product);
+                    return NoContent();
+                }
+                catch
+                {
+                    return BadRequest("Beklenmedik bir hata oluştu");
+                }
             }
-            catch
-            {
-                return BadRequest("Beklenmedik bir hata oluştu");
-            }
+            return BadRequest("Beklenmedik bir hata oluştu");
         }
         [HttpPut("[controller]/Update")]
         public IActionResult Update([FromBody] Product product)

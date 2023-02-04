@@ -106,7 +106,7 @@
             saveCategory() {
                 if (this.name === "") {
                     this.nameError = true;
-                    this.errorMessage = 'Lütfen isim alanını doldurunuz!'
+                    this.errorMessage = 'Lütfen isim alanını doldurunuz!';
                 }
                 else {
                     this.nameError = false;
@@ -161,6 +161,7 @@
             },
             cleanError(){
                 this.nameError = false;
+                this.name = "";
             }
         },
         beforeMount() {
