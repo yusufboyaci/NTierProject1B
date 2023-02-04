@@ -28,7 +28,7 @@
         </table>
     </div>
     <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <button v-on:click="cleanError" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
         Kategori Ekle
     </button>
 
@@ -46,7 +46,10 @@
                     <form>
                         <div class="mb-3">
                             <label class="form-label">Kategori Adı</label>
-                            <input type="text" class="form-control" v-model="name" />
+                            <input type="text" class="form-control" v-model="name" v-bind:class="{'is-invalid' : nameError}" />
+                        </div>
+                        <div class="text-danger" v-if="nameError">
+                            {{ errorMessage }}
                         </div>
                     </form>
                 </div>
@@ -69,7 +72,10 @@
                     <form>
                         <div class="mb-3">
                             <label class="form-label">Kategori Adı</label>
-                            <input type="text" class="form-control" v-model="name" />
+                            <input type="text" class="form-control" v-model="name" v-bind:class="{'is-invalid' : nameError}" />
+                        </div>
+                        <div class="text-danger" v-if="nameError">
+                            {{ errorMessage }}
                         </div>
                     </form>
                 </div>
@@ -91,19 +97,28 @@
             return {
                 id: "",
                 name: "",
-                list: []
+                list: [],
+                nameError: false,
+                errorMessage: ""
             }
         },
         methods: {
             saveCategory() {
-                fetch("/Category/Add", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        name: this.name
-                    }),
-                    headers: { "Content-type": "application/json; charset=UTF-8" }
-                }).then(res => location.reload())
-                    .catch(err => console.log(err));
+                if (this.name === "") {
+                    this.nameError = true;
+                    this.errorMessage = 'Lütfen isim alanını doldurunuz!'
+                }
+                else {
+                    this.nameError = false;
+                    fetch("/Category/Add", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            name: this.name
+                        }),
+                        headers: { "Content-type": "application/json; charset=UTF-8" }
+                    }).then(res => location.reload())
+                        .catch(err => console.log(err));
+                }
             },
             getCategories() {
                 fetch("/Category/List").then(res => res.json())
@@ -122,22 +137,33 @@
                     .catch(err => console.log(err));
             },
             getCategory(category) {
+                this.nameError = false;
                 this.id = category.id;
                 this.name = category.name;
             },
             updateCategory(category) {
-                fetch("/Category/Update", {
-                    method: "PUT",
-                    body: JSON.stringify({
-                        id: category.id,
-                        name: category.name
-                    }),
-                    headers: { "Content-type": "application/json; charset=UTF-8" }
-                }).then(res => { location.reload() })
-                  .catch(err => console.log(err));
+                if (category.name === "") {
+                    this.nameError = true;
+                    this.errorMessage = 'Lütfen isim alanını doldurunuz!'
+                }
+                else {
+                    this.nameError = false;
+                    fetch("/Category/Update", {
+                        method: "PUT",
+                        body: JSON.stringify({
+                            id: category.id,
+                            name: category.name
+                        }),
+                        headers: { "Content-type": "application/json; charset=UTF-8" }
+                    }).then(res => { location.reload() })
+                        .catch(err => console.log(err));
+                }
+            },
+            cleanError(){
+                this.nameError = false;
             }
         },
-        beforeMount(){
+        beforeMount() {
             this.getCategories();
         }
     }).mount("#app");
